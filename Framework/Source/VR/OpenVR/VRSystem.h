@@ -163,6 +163,7 @@ namespace Falcor
         Model::SharedPtr getControllerModel() { return mpControlModel; }
         Model::SharedPtr getTrackerModel() { return mpLighthouseModel; }
         Model::SharedPtr getHMDModel() { return mpHMDModel; }
+        Model::SharedPtr getHiddenAreaMesh(VRDisplay::Eye eye) { return mpHAM[(int)eye]; }
 
         // This is an extra, added by Chris, for a simple xyz axis model for controllers.
         Model::SharedPtr getAxesModel() { return mpAxisModel; }
@@ -246,6 +247,7 @@ namespace Falcor
         Model::SharedPtr  mpLighthouseModel;
         Model::SharedPtr  mpAxisModel;
         Model::SharedPtr  mpHMDModel;
+        Model::SharedPtr  mpHAM[2];
 
         // A representation of the lens distortion for the 2 eyes (either to display on screen, or
         //     to render to the HMD if you're not using the IVRSystem's compositor.  However, this 

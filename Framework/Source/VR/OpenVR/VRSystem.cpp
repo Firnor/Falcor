@@ -175,6 +175,43 @@ namespace Falcor
         return vr::VR_IsHmdPresent();
     }
 
+    Model::SharedPtr extractHiddenAreaMesh(const vr::HiddenAreaMesh_t& ham)
+    {
+        if (ham.unTriangleCount == 0)
+            return nullptr;
+        
+        // OpenVR models use uint16_t index buffers.  Convert to uint32_t for Falcor.
+        //uint32_t *newIdxBuf = (uint32_t *)malloc(pModel->unTriangleCount * 3 * sizeof(uint32_t));
+        //for (uint32_t i = 0; i < pModel->unTriangleCount * 3; i++)
+        //    newIdxBuf[i] = pModel->rIndexData[i];
+
+        uint32_t elementCount = ham.unTriangleCount * 3;
+
+        uint32_t *newIdxBuf = (uint32_t *)malloc(elementCount * sizeof(uint32_t));
+        glm::vec2* posBuf = (glm::vec2 *)malloc(elementCount * sizeof(glm::vec2));
+        for (uint32_t i = 0; i < elementCount; i++)
+        {
+            newIdxBuf[i] = i;
+            posBuf[i] = glm::vec2(ham.pVertexData[i].v[0] * 2.0f - 1.0f, ham.pVertexData[i].v[1] * 2.0f - 1.0f);
+        }
+
+        // Use the SimpleModelImporter to create a Falcor model from memory.
+        SimpleModelImporter::VertexFormat vertLayout;
+        vertLayout.attribs.push_back({ SimpleModelImporter::AttribType::Position, 2, AttribFormat::AttribFormat_F32 });
+        Model::SharedPtr ctrlModel = SimpleModelImporter::create(vertLayout,
+            sizeof(glm::vec2) * elementCount,
+            posBuf,
+            elementCount * sizeof(uint32_t),
+            newIdxBuf,
+            nullptr);
+
+        // Free our temporary memory
+        free(newIdxBuf);
+        free(posBuf);
+
+        return ctrlModel;
+    }
+
     void VRSystem::initDisplayAndController()
     {
         // Create a display/hmd object for our system
@@ -188,6 +225,11 @@ namespace Falcor
         // Create lighthouse trackers for our system
         spVrSystem->mTracker[0] = VRTrackerBox::create(spVrSystem->mpHMD, spVrSystem->mpModels);
         spVrSystem->mTracker[1] = VRTrackerBox::create(spVrSystem->mpHMD, spVrSystem->mpModels);
+
+        auto ham_l = mpHMD->GetHiddenAreaMesh(vr::Eye_Left);
+        spVrSystem->mpHAM[(int)VRDisplay::Eye::Left] = extractHiddenAreaMesh(ham_l);
+        auto ham_r = mpHMD->GetHiddenAreaMesh(vr::Eye_Right);
+        spVrSystem->mpHAM[(int)VRDisplay::Eye::Right] = extractHiddenAreaMesh(ham_r);
 
         // Create a play area
         spVrSystem->mPlayArea = VRPlayArea::create(spVrSystem->mpHMD, spVrSystem->mpChaperone);

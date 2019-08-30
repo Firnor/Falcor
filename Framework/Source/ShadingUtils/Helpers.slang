@@ -384,8 +384,6 @@ float2 sign_not_zero(float2 v)
     return step(0.0, v) * 2.0 - (float2) (1.0);
 }
 
-// TODO: We have octahedral mapping helpers in Utils/MathHelpers.slang. Remove these and update the code.
-
 /** Encodes a float3 direction to an octahedral representation in a 32-bit uint
 */
 uint dir_to_oct(float3 normal)

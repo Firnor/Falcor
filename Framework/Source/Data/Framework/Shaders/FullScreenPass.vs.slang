@@ -40,11 +40,12 @@ struct VsOut
 #endif
 };
 
-VsOut main(float4 posS : POSITION, float2 texC : TEXCOORD)
+VsOut main(float2 posS : POSITION, float2 texC : TEXCOORD)
 {
     VsOut vOut;
     vOut.texC = texC;
-	vOut.posH = posS;
+    vOut.posH = float4(posS.x, posS.y, 1.0f, 1.0f);
+    //vOut.posH = posS;
 #ifdef _SINGLE_PASS_STEREO
     vOut.rightPosH = posS;
     vOut.viewportMask = 0x00000001;
