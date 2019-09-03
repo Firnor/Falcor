@@ -148,7 +148,6 @@ float3 getUniformConeSample(float2 u, float3 N, float cosThetaMax)
     float3 B = normalize(cross(N, T));
     float3 tH = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
     return normalize(T * tH.x + B * tH.y + N * tH.z);
-    //return tH;
 }
 
 /*******************************************************************

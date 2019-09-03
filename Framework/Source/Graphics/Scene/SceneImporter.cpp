@@ -400,7 +400,7 @@ namespace Falcor
                 }
                 float angle = (float)value.GetDouble();
                 // Convert to radiance
-                angle = glm::radians(angle);
+                //angle = glm::radians(angle);
                 pPointLight->setOpeningAngle(angle);
             }
             else if (key == SceneKeys::kLightPenumbraAngle)

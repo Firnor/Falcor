@@ -238,7 +238,8 @@ namespace Falcor
         addVector(jsonLight, allocator, SceneKeys::kLightIntensity, pLight->getIntensity());
         addVector(jsonLight, allocator, SceneKeys::kLightPos, pLight->getWorldPosition());
         addVector(jsonLight, allocator, SceneKeys::kLightDirection, pLight->getWorldDirection());
-        addLiteral(jsonLight, allocator, SceneKeys::kLightOpeningAngle, glm::degrees(pLight->getOpeningAngle()));
+        //addLiteral(jsonLight, allocator, SceneKeys::kLightOpeningAngle, glm::degrees(pLight->getOpeningAngle()));
+        addLiteral(jsonLight, allocator, SceneKeys::kLightOpeningAngle, pLight->getOpeningAngle());
         addLiteral(jsonLight, allocator, SceneKeys::kLightPenumbraAngle, glm::degrees(pLight->getPenumbraAngle()));
     }
 
