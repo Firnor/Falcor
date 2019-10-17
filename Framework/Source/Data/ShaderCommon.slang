@@ -134,4 +134,5 @@ interfacify(RWTexture2DArray);
 interfacify(RWTexture3D);
 #undef interfacify
 
+
 #endif  // _FALCOR_SHADER_COMMON_H_

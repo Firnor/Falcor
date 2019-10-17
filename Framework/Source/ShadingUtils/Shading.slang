@@ -362,13 +362,15 @@ ShadingResult evalMaterial(ShadingData sd, LightData light, float shadowFactor)
 
     // Calculate the diffuse term
     sr.diffuseBrdf = saturate(evalDiffuseBrdf(sd, ls));
-    sr.diffuse = ls.diffuse * sr.diffuseBrdf * ls.NdotL;
+    //sr.diffuse = ls.diffuse * sr.diffuseBrdf * ls.NdotL;
+    sr.diffuse = ls.diffuse * ls.NdotL;
     sr.color.rgb = sr.diffuse;
     sr.color.a = sd.opacity;
 
     // Calculate the specular term
     sr.specularBrdf = saturate(evalSpecularBrdf(sd, ls));
-    sr.specular = ls.specular * sr.specularBrdf * ls.NdotL;
+    //sr.specular = ls.specular * sr.specularBrdf * ls.NdotL;
+    sr.specular = ls.specular * ls.NdotL;
     sr.color.rgb += sr.specular;
 
     // Apply the shadow factor

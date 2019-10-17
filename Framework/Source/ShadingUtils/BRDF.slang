@@ -65,7 +65,7 @@ float3 evalDiffuseDisneyBrdf(ShadingData sd, LightSample ls)
 */
 float3 evalDiffuseLambertBrdf(ShadingData sd, LightSample ls)
 {
-    return sd.diffuse.rgb * (1 / M_PI);
+    return sd.diffuse.rgb * M_INV_PI;
 }
 
 /** Frostbites's diffuse term. Based on https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
@@ -79,7 +79,7 @@ float3 evalDiffuseFrostbiteBrdf(ShadingData sd, LightSample ls)
     float fd0 = 1;
     float lightScatter = fresnelSchlick(fd0, fd90, ls.NdotL).r;
     float viewScatter = fresnelSchlick(fd0, fd90, sd.NdotV).r;
-    return (viewScatter * lightScatter * energyFactor * M_INV_PI) * sd.diffuse.rgb;
+    return (viewScatter * lightScatter * energyFactor * M_INV_PI);
 }
 
 float3 evalDiffuseBrdf(ShadingData sd, LightSample ls)

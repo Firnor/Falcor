@@ -55,6 +55,33 @@ float3 sphericalCrdToDir(float2 uv)
 }
 
 /*******************************************************************
+   	Random numbers based on Mersenne Twister
+*******************************************************************/  
+uint rand_init(uint val0, uint val1, uint backoff = 16)
+{
+    uint v0 = val0;
+    uint v1 = val1;
+    uint s0 = 0;
+
+    for (uint n = 0; n < backoff; n++)
+    {
+        s0 += 0x9e3779b9;
+        v0 += ((v1 << 4) + 0xa341316c) ^ (v1 + s0) ^ ((v1 >> 5) + 0xc8013ea4);
+        v1 += ((v0 << 4) + 0xad90777d) ^ (v0 + s0) ^ ((v0 >> 5) + 0x7e95761e);
+    }
+
+    return v0;
+}
+
+float rand_next(inout uint s)
+{
+    uint LCG_A = 1664525u;
+    uint LCG_C = 1013904223u;
+    s = (LCG_A * s + LCG_C);
+    return float(s & 0x00FFFFFF) / float(0x01000000);
+}
+
+/*******************************************************************
     Sample Patterns
 *******************************************************************/
 
@@ -71,6 +98,26 @@ float radicalInverse(uint i)
 float2 getHammersley(uint i, uint N)
 {
     return float2(float(i) / float(N), radicalInverse(i));
+}
+
+float Halton(int b, int i)
+{
+    float r = 0.0f;
+    float f = 1.0f;
+    while (i > 0)
+    {
+        f = f / float(b);
+        r = r + f * float(i % b);
+        i = int(floor(float(i) / float(b)));
+    }
+    return r;
+}
+
+float2 Halton23(inout uint i)
+{
+    float2 r = float2(Halton(2, (int) i), Halton(3, (int) i));
+    i++;
+    return r;
 }
 
 // Utility function to get a vector perpendicular to an input vector 
@@ -331,32 +378,6 @@ bool evalAlphaTest(uint matFlags, float alpha, float threshold, float3 posW)
 #endif
 }
 
-/*******************************************************************
-   	Random numbers based on Mersenne Twister
-*******************************************************************/  
-uint rand_init(uint val0, uint val1, uint backoff = 16)
-{
-    uint v0 = val0;
-    uint v1 = val1;
-    uint s0 = 0;
-
-    for(uint n = 0; n < backoff; n++)
-    {
-        s0 += 0x9e3779b9;
-        v0 += ((v1<<4)+0xa341316c)^(v1+s0)^((v1>>5)+0xc8013ea4);
-        v1 += ((v0<<4)+0xad90777d)^(v0+s0)^((v0>>5)+0x7e95761e);
-    }
-
-    return v0;
-}
-
-float rand_next(inout uint s)
-{
-    uint LCG_A = 1664525u;
-    uint LCG_C = 1013904223u;
-    s = (LCG_A * s + LCG_C);
-    return float(s & 0x00FFFFFF) / float(0x01000000);
-}
 
 /*******************************************************************
    	Packing stuff
@@ -403,6 +424,14 @@ float3 oct_to_dir(uint octo)
     if (v.z < 0.0)
         v.xy = (1.0 - abs(v.yx)) * sign_not_zero(v.xy);
     return normalize(v);
+}
+
+
+
+
+float lum(float3 color)
+{
+    return dot(color, float3(0.299f, 0.587f, 0.114f));
 }
 
 #endif //_FALCOR_HELPERS_SLANG_

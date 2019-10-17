@@ -53,7 +53,7 @@ void calcCommonLightProperties(ShadingData sd, inout LightSample ls)
 
 float getDistanceFalloff(float distSquared)
 {
-    float falloff = 1 / ((0.01 * 0.01) + distSquared); // The 0.01 is to avoid infs when the light source is close to the shading point
+    float falloff = 1.0f / ((0.01 * 0.01) + distSquared); // The 0.01 is to avoid infs when the light source is close to the shading point
     return falloff;
 }
 
