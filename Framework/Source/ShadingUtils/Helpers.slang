@@ -197,6 +197,18 @@ float3 getUniformConeSample(float2 u, float3 N, float cosThetaMax)
     return normalize(T * tH.x + B * tH.y + N * tH.z);
 }
 
+float getUniformConePdf(float cosThetaMax)
+{
+    return 1.0f / (2.0f * M_PI * (1.0f - cosThetaMax));
+}
+
+float powerHeuristic(int nf, float fPdf, int ng, float gPdf)
+{
+    float f = nf * fPdf;
+    float g = ng * gPdf;
+    return (f * f) / (f * f + g * g);
+}
+
 /*******************************************************************
     Other
 *******************************************************************/

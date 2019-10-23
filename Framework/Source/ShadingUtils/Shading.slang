@@ -269,7 +269,7 @@ ShadingData _prepareShadingData<L:ITextureSampler>(VertexOut v, MaterialData m, 
         sd.specular = lerp(float3(0.04f), baseColor.rgb, spec.b);
         sd.linearRoughness = spec.g;
 
-        if (sampleOcclusion) sd.occlusion = spec.r;
+        if (sampleOcclusion) sd.occlusion = 1.0f;//spec.r; // do not use precomputed ao
     }
     else // if (EXTRACT_SHADING_MODEL(m.flags) == ShadingModelSpecGloss)
     {
@@ -279,12 +279,13 @@ ShadingData _prepareShadingData<L:ITextureSampler>(VertexOut v, MaterialData m, 
 
         if(sampleOcclusion)
         {
-            sd.occlusion = sampleTexture(m.resources.occlusionMap, m.resources.samplerState, v.texC, 1, ChannelTypeTexture, lod);
+            sd.occlusion = 1.0f; //sampleTexture(m.resources.occlusionMap, m.resources.samplerState, v.texC, 1, ChannelTypeTexture, lod); // do not use precomputed ao
         }
     }
 
     sd.linearRoughness = max(0.08, sd.linearRoughness); // Clamp the roughness so that the BRDF won't explode
-    sd.roughness = sd.linearRoughness * sd.linearRoughness;
+    sd.roughness = sd.linearRoughness * sd.
+linearRoughness;
     sd.emissive = sampleTexture(m.resources.emissive, m.resources.samplerState, v.texC, float4(m.emissive, 1), EXTRACT_EMISSIVE_TYPE(m.flags), lod).rgb;
     sd.IoR = m.IoR;
     sd.doubleSidedMaterial = EXTRACT_DOUBLE_SIDED(m.flags);
@@ -295,7 +296,7 @@ ShadingData _prepareShadingData<L:ITextureSampler>(VertexOut v, MaterialData m, 
     sd.height = sd.height * m.heightScaleOffset.x + m.heightScaleOffset.y;
 #undef channel_type
 
-    applyNormalMap(m, sd, lod);
+    //applyNormalMap(m, sd, lod);
     sd.NdotV = dot(sd.N, sd.V);
 
     // Flip the normal if it's backfacing
@@ -363,7 +364,7 @@ ShadingResult evalMaterial(ShadingData sd, LightData light, float shadowFactor)
     // Calculate the diffuse term
     sr.diffuseBrdf = saturate(evalDiffuseBrdf(sd, ls));
     //sr.diffuse = ls.diffuse * sr.diffuseBrdf * ls.NdotL;
-    sr.diffuse = ls.diffuse * ls.NdotL;
+    sr.diffuse = ls.diffuse;
     sr.color.rgb = sr.diffuse;
     sr.color.a = sd.opacity;
 
