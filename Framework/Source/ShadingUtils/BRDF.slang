@@ -53,7 +53,7 @@ float disneyDiffuseFresnel(float NdotV, float NdotL, float LdotH, float linearRo
     float fd0 = 1;
     float lightScatter = fresnelSchlick(fd0, fd90, NdotL).r;
     float viewScatter = fresnelSchlick(fd0, fd90, NdotV).r;
-    return lightScatter * viewScatter;
+    return lightScatter * viewScatter; // * sd.diffuse.rgb
 }
 
 float3 evalDiffuseDisneyBrdf(ShadingData sd, LightSample ls)

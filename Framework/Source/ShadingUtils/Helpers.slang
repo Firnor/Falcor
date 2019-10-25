@@ -120,6 +120,11 @@ float2 Halton23(inout uint i)
     return r;
 }
 
+float2 Halton23fixed(uint i)
+{
+    return float2(Halton(2, (int) i), Halton(3, (int) i));
+}
+
 // Utility function to get a vector perpendicular to an input vector 
 //    (from "Efficient Construction of Perpendicular Vectors Without Branching")
 float3 getPerpendicularStark(float3 u)
