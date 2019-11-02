@@ -58,7 +58,7 @@ float disneyDiffuseFresnel(float NdotV, float NdotL, float LdotH, float linearRo
 
 float3 evalDiffuseDisneyBrdf(ShadingData sd, LightSample ls)
 {
-    return disneyDiffuseFresnel(sd.NdotV, ls.NdotL, ls.LdotH, sd.linearRoughness) * M_INV_PI;
+    return disneyDiffuseFresnel(sd.NdotV, ls.NdotL, ls.LdotH, sd.linearRoughness) * M_INV_PI * sd.diffuse.rgb;
 }
 
 /** Lambertian diffuse
@@ -93,10 +93,12 @@ float3 evalDiffuseBrdf(ShadingData sd, LightSample ls)
 #endif
 }
 
+// http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+
 float evalGGX(float roughness, float NdotH)
 {
     float a2 = roughness * roughness;
-    float d = ((NdotH * a2 - NdotH) * NdotH + 1);
+    float d = ((NdotH * a2 - NdotH) * NdotH + 1.0f);
     return a2 / (d * d);
 }
 
@@ -110,13 +112,13 @@ float evalSmithGGX(float NdotL, float NdotV, float roughness)
     return 0.5f / (ggxv + ggxl);
 }
 
-float3 evalSpecularBrdf(ShadingData sd, LightSample ls)
+float3 evalGGXBrdf(ShadingData sd, LightSample ls)
 {
     float roughness = sd.roughness;
-
-    float D = evalGGX(roughness, ls.NdotH);
+    float D = evalGGX(roughness, ls.NdotH) * M_INV_PI;
     float G = evalSmithGGX(ls.NdotL, sd.NdotV, roughness);
-    float3 F = fresnelSchlick(sd.specular, 1, max(0, ls.LdotH));
-    return D * G * F * M_INV_PI;
+    float3 F0 = lerp(float3(0.04f), sd.diffuse, sd.metalness);
+    float3 F = fresnelSchlick(F0, 1, max(0, ls.LdotH));
+    return D * G * F;
 }
 #endif	// _FALCOR_BRDF_SLANG_

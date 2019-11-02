@@ -227,6 +227,7 @@ ShadingData initShadingData()
     sd.height = 0;
     sd.IoR = 0;
     sd.doubleSidedMaterial = false;
+    sd.materialID = 0;
 
     return sd;
 }
@@ -260,28 +261,46 @@ ShadingData _prepareShadingData<L:ITextureSampler>(VertexOut v, MaterialData m, 
     // Sample the spec texture
     bool sampleOcclusion = EXTRACT_OCCLUSION_MAP(m.flags) > 0;
     float4 spec = sampleTexture(m.resources.specular, m.resources.samplerState, v.texC, m.specular, EXTRACT_SPECULAR_TYPE(m.flags), lod);
-    if (EXTRACT_SHADING_MODEL(m.flags) == ShadingModelMetalRough)
-    {
-        // R - Occlusion; G - Roughness; B - Metalness
-        sd.diffuse = lerp(baseColor.rgb, float3(0), spec.b);
+    //if (EXTRACT_SHADING_MODEL(m.flags) == ShadingModelMetalRough)
+    //{
 
-        // UE4 uses 0.08 multiplied by a default specular value of 0.5 as a base, hence the 0.04
-        sd.specular = lerp(float3(0.04f), baseColor.rgb, spec.b);
-        sd.linearRoughness = spec.g;
+    // R - Material ID; G - Roughness; B - Metalness
+    sd.diffuse = baseColor.rgb;
+    sd.linearRoughness = spec.g;
+    sd.metalness = spec.b;
+    sd.materialID = int(spec.r * 255.0f);
+    if(sd.materialID > 2) sd.materialID = 0; // default to diffuse
+    if(sd.metalness > 0) sd.materialID = 1; // if metalness is set, use GGX
+    if(sd.metalness > 0) sd.metalness = 1; // if metalness is set, use GGX
 
-        if (sampleOcclusion) sd.occlusion = 1.0f;//spec.r; // do not use precomputed ao
-    }
-    else // if (EXTRACT_SHADING_MODEL(m.flags) == ShadingModelSpecGloss)
-    {
-        sd.diffuse = baseColor.rgb;
-        sd.specular = spec.rgb;
-        sd.linearRoughness = 1 - spec.a;
+    //float metalness = sd.materialID == 2 ? 1.0f : 0.0f;
+    //sd.diffuse = lerp(baseColor.rgb, float3(0.0f), metalness);
+    //sd.specular = lerp(float3(0.04f), baseColor.rgb, metalness);
 
-        if(sampleOcclusion)
-        {
-            sd.occlusion = 1.0f; //sampleTexture(m.resources.occlusionMap, m.resources.samplerState, v.texC, 1, ChannelTypeTexture, lod); // do not use precomputed ao
-        }
-    }
+    // UE4 uses 0.08 multiplied by a default specular value of 0.5 as a base, hence the 0.04
+    //sd.specular = lerp(float3(0.04f), baseColor.rgb, spec.b);
+
+    //if (sampleOcclusion) sd.occlusion = 1.0f;//spec.r; /
+
+    /*sd.diffuse = lerp(baseColor.rgb, float3(0), spec.b);
+
+    // UE4 uses 0.08 multiplied by a default specular value of 0.5 as a base, hence the 0.04
+    //sd.specular = lerp(float3(0.04f), baseColor.rgb, spec.b);
+    //sd.linearRoughness = spec.g;
+
+    if (sampleOcclusion) sd.occlusion = 1.0f;//spec.r; // do not use precomputed ao*/
+    //}
+    //else // if (EXTRACT_SHADING_MODEL(m.flags) == ShadingModelSpecGloss)
+    //{
+    //    sd.diffuse = baseColor.rgb;
+    //    sd.specular = spec.rgb;
+    //    sd.linearRoughness = 1 - spec.a;
+    //
+    //    if(sampleOcclusion)
+    //    {
+    //        sd.occlusion = 1.0f; //sampleTexture(m.resources.occlusionMap, m.resources.samplerState, v.texC, 1, ChannelTypeTexture, lod); // do not use precomputed ao
+    //    }
+    //}
 
     sd.linearRoughness = max(0.08, sd.linearRoughness); // Clamp the roughness so that the BRDF won't explode
     sd.roughness = sd.linearRoughness * sd.
@@ -369,7 +388,7 @@ ShadingResult evalMaterial(ShadingData sd, LightData light, float shadowFactor)
     sr.color.a = sd.opacity;
 
     // Calculate the specular term
-    sr.specularBrdf = saturate(evalSpecularBrdf(sd, ls));
+    sr.specularBrdf = saturate(evalGGXBrdf(sd, ls));
     //sr.specular = ls.specular * sr.specularBrdf * ls.NdotL;
     sr.specular = ls.specular * ls.NdotL;
     sr.color.rgb += sr.specular;

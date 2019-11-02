@@ -110,12 +110,14 @@ struct ShadingData
     float3 specular;
     float  linearRoughness; // This is the original roughness, before re-mapping. It is required for the Disney diffuse term
     float  roughness;       // This is the re-mapped roughness value, which should be used for GGX computations
+    float metalness;
     float3 emissive;
     float4 occlusion;
     float3 lightMap;
     float2 height;
     float IoR;
     bool doubleSidedMaterial;
+    int materialID;
 };
 
 #define interfacify(a) typedef a I##a
