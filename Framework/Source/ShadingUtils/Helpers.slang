@@ -445,10 +445,26 @@ float3 oct_to_dir(uint octo)
 
 
 
-
 float lum(float3 color)
 {
-    return dot(color, float3(0.299f, 0.587f, 0.114f));
+    return dot(color, float3(0.2126f, 0.7152f, 0.0722f));
+}
+
+// https://en.wikipedia.org/wiki/Lightness
+// https://en.wikipedia.org/wiki/CIE_1931_color_space
+// https://en.wikipedia.org/wiki/Standard_illuminant
+// https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
+float lightness(float3 color)
+{
+    float Y = lum(color);
+    if (Y <= (216.0f / 24389.0f))
+    { // The CIE standard states 0.008856 but 216/24389 is the intent for 0.008856451679036
+        return Y * (24389.0f / 27.0f) / 100.0f; // The CIE standard states 903.3, but 24389/27 is the intent, making 903.296296296296296
+    }
+    else
+    {
+        return (pow(Y, (1.0f / 3.0f)) * 116.0f - 16.0f) / 100.0f;
+    }
 }
 
 #endif //_FALCOR_HELPERS_SLANG_
