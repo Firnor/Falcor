@@ -221,16 +221,16 @@ namespace Falcor
         case aiTextureType_HEIGHT:
         case aiTextureType_DISPLACEMENT:
             // OBJ doesn't support normal maps, so they are usually placed in the height map slot. For consistency with other formats, we move them to the normal map slot.
-            isObjFile ? pMaterial->setNormalMap(pTexture) : pMaterial->setHeightMap(pTexture);
+            //isObjFile ? pMaterial->setNormalMap(pTexture) : pMaterial->setHeightMap(pTexture);
             break;
         case aiTextureType_NORMALS:
-            pMaterial->setNormalMap(pTexture);
+            //pMaterial->setNormalMap(pTexture);
             break;
         case aiTextureType_AMBIENT:
-            pMaterial->setOcclusionMap(pTexture);
+            //pMaterial->setOcclusionMap(pTexture);
             break;
         case aiTextureType_LIGHTMAP:
-            pMaterial->setLightMap(pTexture);
+            //pMaterial->setLightMap(pTexture);
             break;
         default:
             logWarning("Unsupported Assimp texture type " + std::to_string(type));
@@ -272,6 +272,8 @@ namespace Falcor
         for (int i = 0; i < AI_TEXTURE_TYPE_MAX; ++i)
         {
             aiTextureType aiType = (aiTextureType)i;
+
+            if(aiType == aiTextureType::aiTextureType_NORMALS || aiType == aiTextureType::aiTextureType_DISPLACEMENT || aiType == aiTextureType::aiTextureType_HEIGHT) continue;
 
             uint32_t textureCount = pAiMaterial->GetTextureCount(aiType);
 
