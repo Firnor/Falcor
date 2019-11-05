@@ -112,13 +112,14 @@ float evalSmithGGX(float NdotL, float NdotV, float roughness)
     return 0.5f / (ggxv + ggxl);
 }
 
-float3 evalGGXBrdf(ShadingData sd, LightSample ls)
+float3 evalGGXBrdf(ShadingData sd, LightSample ls, out float prob)
 {
     float roughness = sd.roughness;
     float D = evalGGX(roughness, ls.NdotH) * M_INV_PI;
     float G = evalSmithGGX(ls.NdotL, sd.NdotV, roughness);
     float3 F0 = lerp(float3(0.04f), sd.diffuse, sd.metalness);
     float3 F = fresnelSchlick(F0, 1, max(0, ls.LdotH));
+    prob = D * ls.NdotH / (4.0f * ls.LdotH);
     return D * G * F;
 }
 #endif	// _FALCOR_BRDF_SLANG_
