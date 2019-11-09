@@ -258,11 +258,10 @@ ShadingData _prepareShadingData<L:ITextureSampler>(VertexOut v, MaterialData m, 
     sd.B = normalize(v.bitangentW - sd.N * (dot(v.bitangentW, sd.N)));
     sd.T = normalize(cross(sd.B, sd.N));
 
+if(true) {
     // Sample the spec texture
     bool sampleOcclusion = EXTRACT_OCCLUSION_MAP(m.flags) > 0;
     float4 spec = sampleTexture(m.resources.specular, m.resources.samplerState, v.texC, m.specular, EXTRACT_SPECULAR_TYPE(m.flags), lod);
-    //if (EXTRACT_SHADING_MODEL(m.flags) == ShadingModelMetalRough)
-    //{
 
     // R - Material ID; G - Roughness; B - Metalness
     sd.diffuse = baseColor.rgb;
@@ -273,38 +272,8 @@ ShadingData _prepareShadingData<L:ITextureSampler>(VertexOut v, MaterialData m, 
     if(sd.metalness > 0) sd.materialID = 1; // if metalness is set, use GGX
     if(sd.metalness > 0) sd.metalness = 1; // if metalness is set, use GGX
 
-    //float metalness = sd.materialID == 2 ? 1.0f : 0.0f;
-    //sd.diffuse = lerp(baseColor.rgb, float3(0.0f), metalness);
-    //sd.specular = lerp(float3(0.04f), baseColor.rgb, metalness);
-
-    // UE4 uses 0.08 multiplied by a default specular value of 0.5 as a base, hence the 0.04
-    //sd.specular = lerp(float3(0.04f), baseColor.rgb, spec.b);
-
-    //if (sampleOcclusion) sd.occlusion = 1.0f;//spec.r; /
-
-    /*sd.diffuse = lerp(baseColor.rgb, float3(0), spec.b);
-
-    // UE4 uses 0.08 multiplied by a default specular value of 0.5 as a base, hence the 0.04
-    //sd.specular = lerp(float3(0.04f), baseColor.rgb, spec.b);
-    //sd.linearRoughness = spec.g;
-
-    if (sampleOcclusion) sd.occlusion = 1.0f;//spec.r; // do not use precomputed ao*/
-    //}
-    //else // if (EXTRACT_SHADING_MODEL(m.flags) == ShadingModelSpecGloss)
-    //{
-    //    sd.diffuse = baseColor.rgb;
-    //    sd.specular = spec.rgb;
-    //    sd.linearRoughness = 1 - spec.a;
-    //
-    //    if(sampleOcclusion)
-    //    {
-    //        sd.occlusion = 1.0f; //sampleTexture(m.resources.occlusionMap, m.resources.samplerState, v.texC, 1, ChannelTypeTexture, lod); // do not use precomputed ao
-    //    }
-    //}
-
     sd.linearRoughness = max(0.08, sd.linearRoughness); // Clamp the roughness so that the BRDF won't explode
-    sd.roughness = sd.linearRoughness * sd.
-linearRoughness;
+    sd.roughness = sd.linearRoughness * sd.linearRoughness;
     sd.emissive = sampleTexture(m.resources.emissive, m.resources.samplerState, v.texC, float4(m.emissive, 1), EXTRACT_EMISSIVE_TYPE(m.flags), lod).rgb;
     sd.IoR = m.IoR;
     sd.doubleSidedMaterial = EXTRACT_DOUBLE_SIDED(m.flags);
@@ -315,7 +284,6 @@ linearRoughness;
     sd.height = sd.height * m.heightScaleOffset.x + m.heightScaleOffset.y;
 #undef channel_type
 
-    //applyNormalMap(m, sd, lod);
     sd.NdotV = dot(sd.N, sd.V);
 
     // Flip the normal if it's backfacing
@@ -325,7 +293,19 @@ linearRoughness;
         sd.NdotV = -sd.NdotV;
     }
 
-    return sd;
+} else {
+
+        // TEST
+        sd.diffuse = float3(0.8f);
+        sd.materialID = 0;
+        sd.linearRoughness = 0.8f;
+        sd.metalness = 0;
+        sd.roughness = sd.linearRoughness * sd.
+linearRoughness;
+}
+
+    return
+sd;
 }
 
 /** Prepare the hit-point data
