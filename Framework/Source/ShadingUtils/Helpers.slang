@@ -456,8 +456,8 @@ float lum(float3 color)
 // https://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
 float lightness(float3 color)
 {
-    return lum(color);
-    /*float Y = lum(color);
+    //return lum(color);
+    float Y = lum(color);
     if (Y <= (216.0f / 24389.0f))
     { // The CIE standard states 0.008856 but 216/24389 is the intent for 0.008856451679036
         return Y * (24389.0f / 27.0f) / 100.0f; // The CIE standard states 903.3, but 24389/27 is the intent, making 903.296296296296296
@@ -465,7 +465,7 @@ float lightness(float3 color)
     else
     {
         return (pow(Y, (1.0f / 3.0f)) * 116.0f - 16.0f) / 100.0f;
-    }*/
+    }
 }
 
 #endif //_FALCOR_HELPERS_SLANG_
