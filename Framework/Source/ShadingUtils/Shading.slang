@@ -264,7 +264,7 @@ if(true) {
     float4 spec = sampleTexture(m.resources.specular, m.resources.samplerState, v.texC, m.specular, EXTRACT_SPECULAR_TYPE(m.flags), lod);
 
     // R - Material ID; G - Roughness; B - Metalness
-    sd.diffuse = baseColor.rgb;
+    sd.diffuse = max(0.001f, baseColor.rgb);
     sd.linearRoughness = spec.g;
     sd.metalness = spec.b;
     sd.materialID = int(spec.r * 255.0f);
