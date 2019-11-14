@@ -258,31 +258,42 @@ ShadingData _prepareShadingData<L:ITextureSampler>(VertexOut v, MaterialData m, 
     sd.B = normalize(v.bitangentW - sd.N * (dot(v.bitangentW, sd.N)));
     sd.T = normalize(cross(sd.B, sd.N));
 
-if(true) {
-    // Sample the spec texture
-    bool sampleOcclusion = EXTRACT_OCCLUSION_MAP(m.flags) > 0;
-    float4 spec = sampleTexture(m.resources.specular, m.resources.samplerState, v.texC, m.specular, EXTRACT_SPECULAR_TYPE(m.flags), lod);
+    if(true) {
+        // Sample the spec texture
+        //bool sampleOcclusion = EXTRACT_OCCLUSION_MAP(m.flags) > 0;
+        float4 spec = sampleTexture(m.resources.specular, m.resources.samplerState, v.texC, m.specular, EXTRACT_SPECULAR_TYPE(m.flags), lod);
 
-    // R - Material ID; G - Roughness; B - Metalness
-    sd.diffuse = max(0.001f, baseColor.rgb);
-    sd.linearRoughness = spec.g;
-    sd.metalness = spec.b;
-    sd.materialID = int(spec.r * 255.0f);
-    if(sd.materialID > 2) sd.materialID = 0; // default to diffuse
-    if(sd.metalness > 0) sd.materialID = 1; // if metalness is set, use GGX
-    if(sd.metalness > 0) sd.metalness = 1; // if metalness is set, use GGX
+        // R - Material ID; G - Roughness; B - Metalness
+        sd.diffuse = max(0.001f, baseColor.rgb);
+        sd.linearRoughness = spec.g;
+        sd.metalness = spec.b;
+        sd.materialID = int(spec.r * 255.0f);
+        if(sd.materialID > 2) sd.materialID = 0; // default to diffuse
+        if(sd.metalness > 0) sd.materialID = 1; // if metalness is set, use GGX
 
-    sd.linearRoughness = max(0.08, sd.linearRoughness); // Clamp the roughness so that the BRDF won't explode
-    sd.roughness = sd.linearRoughness * sd.linearRoughness;
-    sd.emissive = sampleTexture(m.resources.emissive, m.resources.samplerState, v.texC, float4(m.emissive, 1), EXTRACT_EMISSIVE_TYPE(m.flags), lod).rgb;
-    sd.IoR = m.IoR;
-    sd.doubleSidedMaterial = EXTRACT_DOUBLE_SIDED(m.flags);
+        sd.linearRoughness = max(0.08, sd.linearRoughness); // Clamp the roughness so that the BRDF won't explode
+        sd.roughness = sd.linearRoughness * sd.linearRoughness;
+        //sd.emissive = sampleTexture(m.resources.emissive, m.resources.samplerState, v.texC, float4(m.emissive, 1), EXTRACT_EMISSIVE_TYPE(m.flags), lod).rgb;
+        //sd.IoR = m.IoR;
+        sd.doubleSidedMaterial = EXTRACT_DOUBLE_SIDED(m.flags);
 
-#define channel_type(extract) (extract(m.flags) ? ChannelTypeTexture : ChannelTypeUnused)
-    sd.lightMap = sampleTexture(m.resources.lightMap, m.resources.samplerState, v.lightmapC, 1, channel_type(EXTRACT_LIGHT_MAP), lod).rgb;
-    sd.height = sampleTexture(m.resources.heightMap, m.resources.samplerState, v.texC, 1, channel_type(EXTRACT_HEIGHT_MAP), lod).xy;
-    sd.height = sd.height * m.heightScaleOffset.x + m.heightScaleOffset.y;
-#undef channel_type
+        /*
+        #define channel_type(extract) (extract(m.flags) ? ChannelTypeTexture : ChannelTypeUnused)
+            sd.lightMap = sampleTexture(m.resources.lightMap, m.resources.samplerState, v.lightmapC, 1, channel_type(EXTRACT_LIGHT_MAP), lod).rgb;
+            sd.height = sampleTexture(m.resources.heightMap, m.resources.samplerState, v.texC, 1, channel_type(EXTRACT_HEIGHT_MAP), lod).xy;
+            sd.height = sd.height * m.heightScaleOffset.x + m.heightScaleOffset.y;
+        #undef channel_type
+        */
+
+    } else {
+
+        // TEST
+        sd.diffuse = float3(0.8f);
+        sd.materialID = 0;
+        sd.linearRoughness = 0.8f;
+        sd.metalness = 0;
+        sd.roughness = sd.linearRoughness * sd.linearRoughness;
+    }
 
     sd.NdotV = dot(sd.N, sd.V);
 
@@ -293,19 +304,7 @@ if(true) {
         sd.NdotV = -sd.NdotV;
     }
 
-} else {
-
-        // TEST
-        sd.diffuse = float3(0.8f);
-        sd.materialID = 0;
-        sd.linearRoughness = 0.8f;
-        sd.metalness = 0;
-        sd.roughness = sd.linearRoughness * sd.
-linearRoughness;
-}
-
-    return
-sd;
+    return sd;
 }
 
 /** Prepare the hit-point data
