@@ -100,7 +100,7 @@ float2 getHammersley(uint i, uint N)
     return float2(float(i) / float(N), radicalInverse(i));
 }
 
-float Halton(int b, int i)
+float Halton(int b, uint i)
 {
     float r = 0.0f;
     float f = 1.0f;
@@ -108,7 +108,7 @@ float Halton(int b, int i)
     {
         f = f / float(b);
         r = r + f * float(i % b);
-        i = int(floor(float(i) / float(b)));
+        i = uint(floor(float(i) / float(b)));
     }
     return r;
 }
